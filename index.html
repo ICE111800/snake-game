@@ -1,27 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Snake Game with Voice Control</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-    }
-    canvas {
-      border: 1px solid black;
-      margin-top: 20px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snake Game with Voice Control</title>
 </head>
 <body>
-  <h3>Snake Game with Voice Control</h3>
-  <canvas id="gameCanvas" width="400" height="400"></canvas>
-  <button onclick="startVoiceControl()">Start Voice Control</button>
-
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@2.8.0"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/speech-commands"></script>
-  <script src="script.js"></script>
+    <canvas id="stage" width="400" height="400"></canvas>
+    <button onclick="initVoiceControl()">Start Voice Control</button>
+    <script src="script.js"></script>
 </body>
 </html>

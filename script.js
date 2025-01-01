@@ -1,13 +1,16 @@
-// Initialize game with voice control
 let gameSnake;
 let recognizer;
 
-// Voice Control Threshold
+// Voice Command Threshold
 const VOICE_COMMAND_THRESHOLD = 0.75;
 
 function initGame() {
     const canvas = document.getElementById('stage');
     const context = canvas.getContext('2d');
+    if (!canvas || !context) {
+        console.error("Canvas element not found. Ensure the <canvas> element is defined with id='stage'.");
+        return;
+    }
     gameSnake = new SnakeGame(canvas, context, { fps: 100, size: 5 });
 }
 
@@ -53,14 +56,12 @@ class SnakeGame {
             case 'down': head.y++; break;
         }
 
-        // Collision detection
         if (this.isCollision(head)) {
             console.log('Collision detected. Restarting...');
             this.init();
             return;
         }
 
-        // Food collision
         if (head.x === this.food.x && head.y === this.food.y) {
             this.score++;
             this.spawnFood();
@@ -136,7 +137,4 @@ async function initVoiceControl() {
     }
 }
 
-window.onload = function () {
-    initGame();
-    initVoiceControl();
-};
+window.onload = initGame;
