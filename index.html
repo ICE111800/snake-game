@@ -132,7 +132,7 @@
   const URL = "https://ice111800.github.io/snake-game/my_model/"; // Use your GitHub Pages URL
 
   async function createModel() {
-    console.log("Initializing the model..."); // Debug line
+    console.log("Initializing the model...");
     const checkpointURL = URL + "model.json";
     const metadataURL = URL + "metadata.json";
 
@@ -141,14 +141,14 @@
     );
 
     await recognizer.ensureModelLoaded();
-    console.log("Speech model loaded successfully!"); // Debug line to confirm loading
+    console.log("Speech model loaded successfully!");
     return recognizer;
   }
 
   async function init() {
     const recognizer = await createModel();
     const classLabels = recognizer.wordLabels();
-    console.log("Class labels loaded:", classLabels);  // Debug line to see the labels
+    console.log("Class labels loaded:", classLabels);
 
     const labelContainer = document.getElementById("label-container");
 
@@ -157,35 +157,35 @@
     }
 
     recognizer.listen(result => {
-      console.log("Speech result received:", result);  // Debug line to show results
+      console.log("Speech result received:", result);
       const scores = result.scores;
       for (let i = 0; i < classLabels.length; i++) {
         const classPrediction = classLabels[i] + ": " + result.scores[i].toFixed(2);
         labelContainer.childNodes[i].innerHTML = classPrediction;
-        console.log(classPrediction);  // Debug line to check recognition results
+        console.log(classPrediction);
 
         // Control snake based on speech commands
-        if (classLabels[i] === "up" && result.scores[i] > 0.3) {
+        if (classLabels[i] === "up" && result.scores[i] > 0.1) { // Lowered the threshold
           snake.dy = -grid;
           snake.dx = 0;
-          console.log("Moving up: ", snake.dy, snake.dx);  // 輸出蛇的方向
-        } else if (classLabels[i] === "down" && result.scores[i] > 0.3) {
+          console.log("Moving up: ", snake.dy, snake.dx);
+        } else if (classLabels[i] === "down" && result.scores[i] > 0.1) {
           snake.dy = grid;
           snake.dx = 0;
-          console.log("Moving down: ", snake.dy, snake.dx);  // 輸出蛇的方向
-        } else if (classLabels[i] === "left" && result.scores[i] > 0.3) {
+          console.log("Moving down: ", snake.dy, snake.dx);
+        } else if (classLabels[i] === "left" && result.scores[i] > 0.1) {
           snake.dx = -grid;
           snake.dy = 0;
-          console.log("Moving left: ", snake.dy, snake.dx);  // 輸出蛇的方向
-        } else if (classLabels[i] === "right" && result.scores[i] > 0.3) {
+          console.log("Moving left: ", snake.dy, snake.dx);
+        } else if (classLabels[i] === "right" && result.scores[i] > 0.1) {
           snake.dx = grid;
           snake.dy = 0;
-          console.log("Moving right: ", snake.dy, snake.dx);  // 輸出蛇的方向
+          console.log("Moving right: ", snake.dy, snake.dx);
         }
       }
     }, {
       includeSpectrogram: true,
-      probabilityThreshold: 0.3,  // Adjusted to 0.3
+      probabilityThreshold: 0.1, // Lowered threshold
       invokeCallbackOnNoiseAndUnknown: true,
       overlapFactor: 0.50
     });
