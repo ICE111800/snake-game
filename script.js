@@ -17,11 +17,10 @@ Component.Stage = function (canvas, conf) {
   this.conf = {
     cw: 10,
     size: 5,
-    fps: 1000
+    fps: 100
   };
 
-  // Merge Conf
-  if (typeof conf == 'object') {
+  if (typeof conf === 'object') {
     for (var key in conf) {
       if (conf.hasOwnProperty(key)) {
         this.conf[key] = conf[key];
@@ -101,6 +100,7 @@ Game.Draw = function (context, snake) {
 
     this.drawCell(snake.stage.food.x, snake.stage.food.y);
 
+    context.fillStyle = 'black';
     context.fillText('Score: ' + snake.stage.score, 5, (snake.stage.height - 5));
   };
 
@@ -113,6 +113,7 @@ Game.Draw = function (context, snake) {
 
   this.collision = function (nx, ny) {
     if (nx < 0 || nx >= snake.stage.width / snake.stage.conf.cw || ny < 0 || ny >= snake.stage.height / snake.stage.conf.cw) {
+      console.log('Collision detected. Restarting...');
       return true;
     }
     return false;
@@ -132,13 +133,12 @@ Game.Snake = function (elementId, conf) {
 };
 
 // Teachable Machine Voice Control
-let recognizer, voiceControlEnabled = true;
+let recognizer, gameSnake, voiceControlEnabled = true;
 
-// Initialize voice control
 async function initVoiceControl() {
   try {
-    const modelURL = "https://ice111800.github.io/snake-game/my_model/model.json"; // 使用正確的 URL
-    const metadataURL = "https://ice111800.github.io/snake-game/my_model/metadata.json"; // 使用正確的 URL
+    const modelURL = "https://ice111800.github.io/snake-game/my_model/model.json";
+    const metadataURL = "https://ice111800.github.io/snake-game/my_model/metadata.json";
 
     recognizer = await speechCommands.create('BROWSER_FFT', undefined, modelURL, metadataURL);
     await recognizer.ensureModelLoaded();
@@ -152,7 +152,6 @@ async function initVoiceControl() {
 
       console.log('Voice Command:', direction, 'Score:', highestScore);
 
-      // 這裡可以改變蛇的移動方向
       if (voiceControlEnabled && highestScore > 0.75) {
         if (['up', 'down', 'left', 'right'].includes(direction)) {
           gameSnake.snake.stage.direction = direction;
@@ -166,8 +165,5 @@ async function initVoiceControl() {
 }
 
 window.onload = function () {
-  let gameSnake = new Game.Snake('stage', { fps: 100, size: 4 });
-  initVoiceControl(gameSnake);  // 傳遞 gameSnake 物件給 initVoiceControl
+  gameSnake = new Game.Snake('stage', { fps: 100, size: 4 });
 };
-
-
