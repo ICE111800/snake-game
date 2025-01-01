@@ -5,37 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Snake Game with Voice Control</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-      background-color: #f0f0f0;
-    }
-
-    canvas {
-      background-color: #000;
-      border: 1px solid #ccc;
-    }
-
-    #label-container {
-      position: fixed;
-      top: 10px;
-      left: 10px;
-      font-size: 18px;
-      color: white;
-    }
-
-    #label-container div {
-      margin: 5px;
-    }
+    body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f0f0f0; }
+    canvas { background-color: #000; border: 1px solid #ccc; }
   </style>
 </head>
 <body>
   <canvas id="gameCanvas" width="400" height="400"></canvas>
-  <div id="label-container"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/speech-commands"></script>
@@ -46,53 +21,34 @@
     const grid = 20;
     let snake = [{ x: 160, y: 160 }];
     let apple = { x: 80, y: 80 };
-    let dx = grid, dy = 0; // 初始方向向右
+    let dx = grid, dy = 0;
     let gameInterval;
-    let directionLocked = false;  // 防止指令過快反覆
-    let lastCommandTime = 0;
 
-    // 初始遊戲畫面
     function drawGame() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // 繪製蛇
       snake.forEach((segment, index) => {
         ctx.fillStyle = index === 0 ? 'lime' : 'green';
         ctx.fillRect(segment.x, segment.y, grid - 1, grid - 1);
       });
-
-      // 繪製蘋果
       ctx.fillStyle = 'red';
       ctx.fillRect(apple.x, apple.y, grid - 1, grid - 1);
-
-      // 更新蛇的位置
+      
       const head = { x: snake[0].x + dx, y: snake[0].y + dy };
       snake.unshift(head);
-
-      // 蛇吃到蘋果
-      if (head.x === apple.x && head.y === apple.y) {
-        placeApple();
-      } else {
-        snake.pop();
-      }
-
-      // 檢查蛇是否撞到邊界或自身
-      if (head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height || collision(head)) {
-        resetGame();
-      }
+      
+      if (head.x === apple.x && head.y === apple.y) placeApple();
+      else snake.pop();
+      
+      if (head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height || collision(head)) resetGame();
     }
 
-    // 檢查蛇是否撞到自身
     function collision(head) {
       for (let i = 1; i < snake.length; i++) {
-        if (head.x === snake[i].x && head.y === snake[i].y) {
-          return true;
-        }
+        if (head.x === snake[i].x && head.y === snake[i].y) return true;
       }
       return false;
     }
 
-    // 重新開始遊戲
     function resetGame() {
       snake = [{ x: 160, y: 160 }];
       dx = grid;
@@ -102,101 +58,36 @@
       gameInterval = setInterval(drawGame, 100);
     }
 
-    // 隨機放置蘋果
     function placeApple() {
       apple.x = Math.floor(Math.random() * (canvas.width / grid)) * grid;
       apple.y = Math.floor(Math.random() * (canvas.height / grid)) * grid;
     }
 
-    // 初始化語音模型
     async function init() {
       const recognizer = await createModel();
-      const classLabels = recognizer.wordLabels();
-      console.log("Class labels loaded:", classLabels);
-
-      // 顯示語音識別的結果在HTML頁面
-      const labelContainer = document.getElementById("label-container");
-      for (let i = 0; i < classLabels.length; i++) {
-        labelContainer.appendChild(document.createElement("div"));
-      }
-
-      // 設置語音識別回調
       recognizer.listen(result => {
-        console.log("Speech result received:", result);
         const scores = result.scores;
-        const currentTime = Date.now();
-
-        // 冷卻時間檢查
-        if (currentTime - lastCommandTime < 300 || directionLocked) {
-          return;
-        }
-
         let newDirection = null;
-
-        // 提高識別閾值，只在結果強烈時執行命令
         const threshold = 0.7;
-        const noiseThreshold = 0.1;
-
-        // 如果背景噪音太高則忽略這次結果
-        if (result.scores[4] > noiseThreshold) {
-          console.log("Ignoring due to background noise");
-          return;
-        }
-
-        // 根據識別的結果來決定方向
-        for (let i = 0; i < classLabels.length; i++) {
-          const classPrediction = classLabels[i] + ": " + result.scores[i].toFixed(2);
-          labelContainer.childNodes[i].innerHTML = classPrediction;
-          console.log(classPrediction);
-
-          // 檢查各個方向的得分是否超過設定的閾值
-          if (result.scores[i] > threshold) {
-            if (classLabels[i] === "UP" && dy === 0) {
-              newDirection = { dx: 0, dy: -grid };
-            } else if (classLabels[i] === "DOWN" && dy === 0) {
-              newDirection = { dx: 0, dy: grid };
-            } else if (classLabels[i] === "LEFT" && dx === 0) {
-              newDirection = { dx: -grid, dy: 0 };
-            } else if (classLabels[i] === "RIGHT" && dx === 0) {
-              newDirection = { dx: grid, dy: 0 };
-            }
-          }
-        }
-
-        // 如果有確定的新的方向，更新蛇的方向
-        if (newDirection) {
-          dx = newDirection.dx;
-          dy = newDirection.dy;
-          directionLocked = true;
-          lastCommandTime = currentTime;
-
-          // 設定冷卻時間
-          setTimeout(() => { directionLocked = false; }, 300);  // 冷卻時間
-        }
-      }, {
-        includeSpectrogram: true, 
-        probabilityThreshold: 0.7, 
-        invokeCallbackOnNoiseAndUnknown: true,
-        overlapFactor: 0.50 
+        if (scores[4] > 0.1) return;
+        
+        if (scores[0] > threshold) newDirection = { dx: 0, dy: -grid };
+        if (scores[1] > threshold) newDirection = { dx: 0, dy: grid };
+        if (scores[2] > threshold) newDirection = { dx: -grid, dy: 0 };
+        if (scores[3] > threshold) newDirection = { dx: grid, dy: 0 };
+        
+        if (newDirection) { dx = newDirection.dx; dy = newDirection.dy; }
       });
     }
 
-    // 創建並初始化語音模型
     async function createModel() {
-      const model = await speechCommands.create(
-        "BROWSER_FFT",
-        null,
-        "https://storage.googleapis.com/tm-model/snake_game_model/model.json",
-        "https://storage.googleapis.com/tm-model/snake_game_model/metadata.json"
-      );
+      const model = await speechCommands.create("BROWSER_FFT", null, "model.json", "metadata.json");
       await model.ensureModelLoaded();
       return model;
     }
 
-    // 啟動遊戲
     resetGame();
-    init(); // 啟動語音控制
-
+    init();
   </script>
 </body>
 </html>
