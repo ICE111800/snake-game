@@ -156,10 +156,10 @@
 
       let newDirection = null;
 
-      const threshold = 0.7;  // Slightly increased threshold for better control
+      const threshold = 0.6;  // Reduced threshold to 0.6 for quicker response
 
       // More aggressive background noise filtering
-      const noiseThreshold = 0.2;  // Increased noise threshold
+      const noiseThreshold = 0.3;  // Increased noise threshold
       if (result.scores[4] > noiseThreshold) {
         console.log("Ignoring due to background noise");
         return;
