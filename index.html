@@ -1,2 +1,139 @@
-<h3>Simple Snake Game</h3>
-<canvas id="stage" height="400" width="520"></canvas>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Voice Controlled Snake Game</title>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+    }
+    body {
+      background: black;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    canvas {
+      border: 1px solid white;
+    }
+  </style>
+</head>
+<body>
+<canvas width="400" height="400" id="game"></canvas>
+<div id="label-container"></div>
+<button onclick="initVoiceControl()">Start Voice Control</button>
+
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.3.1/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/speech-commands@0.4.0/dist/speech-commands.min.js"></script>
+
+<script>
+  // Snake Game Code
+  var canvas = document.getElementById('game');
+  var context = canvas.getContext('2d');
+  var grid = 16;
+  var count = 0;
+  var snake = { x: 160, y: 160, dx: grid, dy: 0, cells: [], maxCells: 4 };
+  var apple = { x: 320, y: 320 };
+  var directionQueue = null; // Queue for new directions from voice commands
+
+  function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min)) + min;
+  }
+
+  function loop() {
+    requestAnimationFrame(loop);
+    if (++count < 4) return;
+    count = 0;
+    context.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Update snake direction from voice command queue
+    if (directionQueue) {
+      if (directionQueue === 'left' && snake.dx === 0) {
+        snake.dx = -grid; snake.dy = 0;
+      } else if (directionQueue === 'up' && snake.dy === 0) {
+        snake.dy = -grid; snake.dx = 0;
+      } else if (directionQueue === 'right' && snake.dx === 0) {
+        snake.dx = grid; snake.dy = 0;
+      } else if (directionQueue === 'down' && snake.dy === 0) {
+        snake.dy = grid; snake.dx = 0;
+      }
+      directionQueue = null; // Clear the queue
+    }
+
+    // Move snake
+    snake.x += snake.dx;
+    snake.y += snake.dy;
+
+    // Wrap around edges
+    if (snake.x < 0) snake.x = canvas.width - grid;
+    if (snake.x >= canvas.width) snake.x = 0;
+    if (snake.y < 0) snake.y = canvas.height - grid;
+    if (snake.y >= canvas.height) snake.y = 0;
+
+    // Update snake cells
+    snake.cells.unshift({ x: snake.x, y: snake.y });
+    if (snake.cells.length > snake.maxCells) snake.cells.pop();
+
+    // Draw apple
+    context.fillStyle = 'red';
+    context.fillRect(apple.x, apple.y, grid - 1, grid - 1);
+
+    // Draw snake
+    context.fillStyle = 'green';
+    snake.cells.forEach(function (cell, index) {
+      context.fillRect(cell.x, cell.y, grid - 1, grid - 1);
+
+      // Check collision with apple
+      if (cell.x === apple.x && cell.y === apple.y) {
+        snake.maxCells++;
+        apple.x = getRandomInt(0, 25) * grid;
+        apple.y = getRandomInt(0, 25) * grid;
+      }
+
+      // Check collision with self
+      for (var i = index + 1; i < snake.cells.length; i++) {
+        if (cell.x === snake.cells[i].x && cell.y === snake.cells[i].y) {
+          snake.x = 160; snake.y = 160; snake.cells = []; snake.maxCells = 4; snake.dx = grid; snake.dy = 0;
+          apple.x = getRandomInt(0, 25) * grid;
+          apple.y = getRandomInt(0, 25) * grid;
+        }
+      }
+    });
+  }
+
+  requestAnimationFrame(loop);
+
+  // Voice Control Code
+  const URL = "https://ice111800.github.io/snake-game/my_model/";
+
+  async function initVoiceControl() {
+    const recognizer = await createModel();
+    const classLabels = recognizer.wordLabels();
+    recognizer.listen(result => {
+      const scores = result.scores;
+      const maxIndex = scores.indexOf(Math.max(...scores));
+      const command = classLabels[maxIndex];
+
+      // Update direction based on recognized command
+      if (['up', 'down', 'left', 'right'].includes(command)) {
+        directionQueue = command;
+      }
+
+      // Display probabilities
+      const labelContainer = document.getElementById("label-container");
+      labelContainer.innerHTML = classLabels.map((label, i) => (
+        `<div>${label}: ${scores[i].toFixed(2)}</div>`
+      )).join('');
+    }, { probabilityThreshold: 0.75 });
+  }
+
+  async function createModel() {
+    const checkpointURL = URL + "model.json";
+    const metadataURL = URL + "metadata.json";
+    const recognizer = speechCommands.create("BROWSER_FFT", undefined, checkpointURL, metadataURL);
+    await recognizer.ensureModelLoaded();
+    return recognizer;
+  }
+</script>
+</body>
+</html>
