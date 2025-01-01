@@ -63,7 +63,7 @@
   function loop() {
     requestAnimationFrame(loop);
 
-    if (++count < 2) { // Increase the frequency of the game update (was 4)
+    if (++count < 4) {
       return;
     }
 
@@ -132,14 +132,12 @@
   const URL = "https://ice111800.github.io/snake-game/my_model/"; // Use your GitHub Pages URL
 
   async function createModel() {
+    console.log("Initializing the model..."); // Debug line
     const checkpointURL = URL + "model.json";
     const metadataURL = URL + "metadata.json";
 
     const recognizer = speechCommands.create(
-      "BROWSER_FFT", // Fourier Transform type
-      undefined, // Speech commands vocabulary feature
-      checkpointURL,
-      metadataURL
+      "BROWSER_FFT", undefined, checkpointURL, metadataURL
     );
 
     await recognizer.ensureModelLoaded();
@@ -147,56 +145,54 @@
     return recognizer;
   }
 
-  // 語音識別設定
-async function init() {
-  const recognizer = await createModel();
-  const classLabels = recognizer.wordLabels();
-  const labelContainer = document.getElementById("label-container");
+  async function init() {
+    const recognizer = await createModel();
+    const classLabels = recognizer.wordLabels();
+    console.log("Class labels loaded:", classLabels);  // Debug line to see the labels
 
-  for (let i = 0; i < classLabels.length; i++) {
-    labelContainer.appendChild(document.createElement("div"));
+    const labelContainer = document.getElementById("label-container");
+
+    for (let i = 0; i < classLabels.length; i++) {
+      labelContainer.appendChild(document.createElement("div"));
+    }
+
+    recognizer.listen(result => {
+      console.log("Speech result received:", result);  // Debug line to show results
+      const scores = result.scores;
+      for (let i = 0; i < classLabels.length; i++) {
+        const classPrediction = classLabels[i] + ": " + result.scores[i].toFixed(2);
+        labelContainer.childNodes[i].innerHTML = classPrediction;
+        console.log(classPrediction);  // Debug line to check recognition results
+
+        // Control snake based on speech commands
+        if (classLabels[i] === "up" && result.scores[i] > 0.3) {
+          snake.dy = -grid;
+          snake.dx = 0;
+          console.log("Moving up: ", snake.dy, snake.dx);  // 輸出蛇的方向
+        } else if (classLabels[i] === "down" && result.scores[i] > 0.3) {
+          snake.dy = grid;
+          snake.dx = 0;
+          console.log("Moving down: ", snake.dy, snake.dx);  // 輸出蛇的方向
+        } else if (classLabels[i] === "left" && result.scores[i] > 0.3) {
+          snake.dx = -grid;
+          snake.dy = 0;
+          console.log("Moving left: ", snake.dy, snake.dx);  // 輸出蛇的方向
+        } else if (classLabels[i] === "right" && result.scores[i] > 0.3) {
+          snake.dx = grid;
+          snake.dy = 0;
+          console.log("Moving right: ", snake.dy, snake.dx);  // 輸出蛇的方向
+        }
+      }
+    }, {
+      includeSpectrogram: true,
+      probabilityThreshold: 0.3,  // Adjusted to 0.3
+      invokeCallbackOnNoiseAndUnknown: true,
+      overlapFactor: 0.50
+    });
   }
 
-  recognizer.listen(result => {
-    console.log("Speech result:", result); // 輸出語音識別結果
-    const scores = result.scores;
-    for (let i = 0; i < classLabels.length; i++) {
-      const classPrediction = classLabels[i] + ": " + result.scores[i].toFixed(2);
-      labelContainer.childNodes[i].innerHTML = classPrediction;
-      console.log(classPrediction);  // 輸出每個命令的信心水平
-
-      // 語音控制蛇的移動
-      if (classLabels[i] === "up" && result.scores[i] > 0.75) {
-        snake.dy = -grid;
-        snake.dx = 0;
-        console.log("Moving up: ", snake.dy, snake.dx);  // Debug: 輸出蛇的方向
-      } else if (classLabels[i] === "down" && result.scores[i] > 0.75) {
-        snake.dy = grid;
-        snake.dx = 0;
-        console.log("Moving down: ", snake.dy, snake.dx);  // Debug: 輸出蛇的方向
-      } else if (classLabels[i] === "left" && result.scores[i] > 0.75) {
-        snake.dx = -grid;
-        snake.dy = 0;
-        console.log("Moving left: ", snake.dy, snake.dx);  // Debug: 輸出蛇的方向
-      } else if (classLabels[i] === "right" && result.scores[i] > 0.75) {
-        snake.dx = grid;
-        snake.dy = 0;
-        console.log("Moving right: ", snake.dy, snake.dx);  // Debug: 輸出蛇的方向
-      }
-    }
-  }, {
-    includeSpectrogram: true,
-    probabilityThreshold: 0.5, // 降低識別閾值
-    invokeCallbackOnNoiseAndUnknown: true,
-    overlapFactor: 0.50
-  });
-
-  // 啟動遊戲循環
+  // Start the game loop
   requestAnimationFrame(loop);
-}
-
-
-  // Start initialization
   init();
 </script>
 
