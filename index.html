@@ -165,19 +165,19 @@
         console.log(classPrediction);
 
         // Control snake based on speech commands
-        if (classLabels[i] === "up" && result.scores[i] > 0.1) { // Lowered the threshold
+        if (classLabels[i] === "UP" && result.scores[i] > 0.1) { // Lowered the threshold
           snake.dy = -grid;
           snake.dx = 0;
           console.log("Moving up: ", snake.dy, snake.dx);
-        } else if (classLabels[i] === "down" && result.scores[i] > 0.1) {
+        } else if (classLabels[i] === "DOWN" && result.scores[i] > 0.1) {
           snake.dy = grid;
           snake.dx = 0;
           console.log("Moving down: ", snake.dy, snake.dx);
-        } else if (classLabels[i] === "left" && result.scores[i] > 0.1) {
+        } else if (classLabels[i] === "LEFT" && result.scores[i] > 0.1) {
           snake.dx = -grid;
           snake.dy = 0;
           console.log("Moving left: ", snake.dy, snake.dx);
-        } else if (classLabels[i] === "right" && result.scores[i] > 0.1) {
+        } else if (classLabels[i] === "RIGHT" && result.scores[i] > 0.1) {
           snake.dx = grid;
           snake.dy = 0;
           console.log("Moving right: ", snake.dy, snake.dx);
