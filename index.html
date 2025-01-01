@@ -63,7 +63,7 @@
   function loop() {
     requestAnimationFrame(loop);
 
-    if (++count < 4) {
+    if (++count < 2) { // Increase the frequency of the game update (was 4)
       return;
     }
 
@@ -165,21 +165,29 @@
 
         // Control snake based on speech commands
         if (classLabels[i] === "up" && result.scores[i] > 0.75) {
-          snake.dy = -grid;
-          snake.dx = 0;
-          console.log("Moving up: ", snake.dy, snake.dx);  // 輸出蛇的方向
+          if (snake.dy !== grid) {  // Prevent snake from moving in the opposite direction
+            snake.dy = -grid;
+            snake.dx = 0;
+            console.log("Moving up: ", snake.dy, snake.dx);  // Debug: Output snake direction
+          }
         } else if (classLabels[i] === "down" && result.scores[i] > 0.75) {
-          snake.dy = grid;
-          snake.dx = 0;
-          console.log("Moving down: ", snake.dy, snake.dx);  // 輸出蛇的方向
+          if (snake.dy !== -grid) {  // Prevent snake from moving in the opposite direction
+            snake.dy = grid;
+            snake.dx = 0;
+            console.log("Moving down: ", snake.dy, snake.dx);  // Debug: Output snake direction
+          }
         } else if (classLabels[i] === "left" && result.scores[i] > 0.75) {
-          snake.dx = -grid;
-          snake.dy = 0;
-          console.log("Moving left: ", snake.dy, snake.dx);  // 輸出蛇的方向
+          if (snake.dx !== grid) {  // Prevent snake from moving in the opposite direction
+            snake.dx = -grid;
+            snake.dy = 0;
+            console.log("Moving left: ", snake.dy, snake.dx);  // Debug: Output snake direction
+          }
         } else if (classLabels[i] === "right" && result.scores[i] > 0.75) {
-          snake.dx = grid;
-          snake.dy = 0;
-          console.log("Moving right: ", snake.dy, snake.dx);  // 輸出蛇的方向
+          if (snake.dx !== -grid) {  // Prevent snake from moving in the opposite direction
+            snake.dx = grid;
+            snake.dy = 0;
+            console.log("Moving right: ", snake.dy, snake.dx);  // Debug: Output snake direction
+          }
         }
       }
     }, {
@@ -188,10 +196,12 @@
       invokeCallbackOnNoiseAndUnknown: true,
       overlapFactor: 0.50
     });
+
+    // Start the game loop after recognizer is ready
+    requestAnimationFrame(loop);
   }
 
-  // Start the game loop
-  requestAnimationFrame(loop);
+  // Start initialization
   init();
 </script>
 
