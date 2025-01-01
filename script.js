@@ -135,10 +135,10 @@ Game.Snake = function (elementId, conf) {
 let recognizer, voiceControlEnabled = true;
 
 // Initialize voice control
-async function initVoiceControl(gameSnake) {
+async function initVoiceControl() {
   try {
-    const modelURL = "https://ice111800.github.io/snake-game/my_model/model.json";  // 修改為 GitHub Pages 上的正確路徑
-    const metadataURL = "https://ice111800.github.io/snake-game/my_model/metadata.json";  // 修改為 GitHub Pages 上的正確路徑
+    const modelURL = "https://ice111800.github.io/snake-game/my_model/model.json"; // 使用正確的 URL
+    const metadataURL = "https://ice111800.github.io/snake-game/my_model/metadata.json"; // 使用正確的 URL
 
     recognizer = await speechCommands.create('BROWSER_FFT', undefined, modelURL, metadataURL);
     await recognizer.ensureModelLoaded();
@@ -152,7 +152,7 @@ async function initVoiceControl(gameSnake) {
 
       console.log('Voice Command:', direction, 'Score:', highestScore);
 
-      // Change direction based on voice command
+      // 這裡可以改變蛇的移動方向
       if (voiceControlEnabled && highestScore > 0.75) {
         if (['up', 'down', 'left', 'right'].includes(direction)) {
           gameSnake.snake.stage.direction = direction;
@@ -165,9 +165,9 @@ async function initVoiceControl(gameSnake) {
   }
 }
 
-
 window.onload = function () {
   let gameSnake = new Game.Snake('stage', { fps: 100, size: 4 });
   initVoiceControl(gameSnake);  // 傳遞 gameSnake 物件給 initVoiceControl
 };
+
 
