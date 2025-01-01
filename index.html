@@ -171,13 +171,16 @@
 
       let newDirection = null;
 
+      // Increase the threshold for more precise control
+      const threshold = 0.4; // Raised threshold to 0.4 to avoid detecting noise
+
       for (let i = 0; i < classLabels.length; i++) {
         const classPrediction = classLabels[i] + ": " + result.scores[i].toFixed(2);
         labelContainer.childNodes[i].innerHTML = classPrediction;
         console.log(classPrediction);
 
         // Control snake based on speech commands, ignoring background noise
-        if (result.scores[i] > 0.3) { // Check if score is above the threshold
+        if (result.scores[i] > threshold) { // Higher threshold
           if (classLabels[i] === "UP" && snake.dy === 0) {
             newDirection = { dx: 0, dy: -grid };
           } else if (classLabels[i] === "DOWN" && snake.dy === 0) {
