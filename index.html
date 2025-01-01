@@ -150,13 +150,13 @@
       const scores = result.scores;
       const currentTime = Date.now();
 
-      if (currentTime - lastCommandTime < 1000 || directionLocked) {
+      if (currentTime - lastCommandTime < 1500 || directionLocked) {  // Increased cooldown time
         return;
       }
 
       let newDirection = null;
 
-      const threshold = 0.5; // Raised threshold to 0.5 for more reliable control
+      const threshold = 0.6;  // Raised threshold to 0.6 for more reliable control
 
       for (let i = 0; i < classLabels.length; i++) {
         const classPrediction = classLabels[i] + ": " + result.scores[i].toFixed(2);
@@ -182,7 +182,7 @@
         directionLocked = true;
         lastCommandTime = currentTime;
 
-        setTimeout(() => { directionLocked = false; }, 500); // Longer lock time
+        setTimeout(() => { directionLocked = false; }, 1000);  // Longer lock time
       }
     }, {
       includeSpectrogram: true,
