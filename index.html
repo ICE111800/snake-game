@@ -157,6 +157,7 @@
     }
 
     let lastCommandTime = 0;  // Add a cooldown timer to prevent rapid direction changes
+    let directionLocked = false;  // Add a lock to prevent rapid direction changes
 
     recognizer.listen(result => {
       console.log("Speech result received:", result);
@@ -164,9 +165,11 @@
       const currentTime = Date.now();
 
       // Only respond to commands if enough time has passed (prevent rapid direction changes)
-      if (currentTime - lastCommandTime < 1000) { // 1 second cooldown
+      if (currentTime - lastCommandTime < 1000 || directionLocked) { // 1 second cooldown
         return;
       }
+
+      let newDirection = null;
 
       for (let i = 0; i < classLabels.length; i++) {
         const classPrediction = classLabels[i] + ": " + result.scores[i].toFixed(2);
@@ -174,30 +177,30 @@
         console.log(classPrediction);
 
         // Control snake based on speech commands, ignoring background noise
-        if (result.scores[i] > 0.2) { // Check if score is above the threshold
-          if (classLabels[i] === "UP") {
-            snake.dy = -grid;
-            snake.dx = 0;
-            console.log("Moving up: ", snake.dy, snake.dx);
-          } else if (classLabels[i] === "DOWN") {
-            snake.dy = grid;
-            snake.dx = 0;
-            console.log("Moving down: ", snake.dy, snake.dx);
-          } else if (classLabels[i] === "LEFT") {
-            snake.dx = -grid;
-            snake.dy = 0;
-            console.log("Moving left: ", snake.dy, snake.dx);
-          } else if (classLabels[i] === "RIGHT") {
-            snake.dx = grid;
-            snake.dy = 0;
-            console.log("Moving right: ", snake.dy, snake.dx);
+        if (result.scores[i] > 0.3) { // Check if score is above the threshold
+          if (classLabels[i] === "UP" && snake.dy === 0) {
+            newDirection = { dx: 0, dy: -grid };
+          } else if (classLabels[i] === "DOWN" && snake.dy === 0) {
+            newDirection = { dx: 0, dy: grid };
+          } else if (classLabels[i] === "LEFT" && snake.dx === 0) {
+            newDirection = { dx: -grid, dy: 0 };
+          } else if (classLabels[i] === "RIGHT" && snake.dx === 0) {
+            newDirection = { dx: grid, dy: 0 };
           }
-          lastCommandTime = currentTime;  // Update the time of the last command
         }
+      }
+
+      if (newDirection) {
+        snake.dx = newDirection.dx;
+        snake.dy = newDirection.dy;
+        directionLocked = true;
+        lastCommandTime = currentTime;  // Update the time of the last command
+
+        setTimeout(() => { directionLocked = false; }, 500);  // Unlock direction after 500ms
       }
     }, {
       includeSpectrogram: true,
-      probabilityThreshold: 0.2, // Lowered threshold to 0.2
+      probabilityThreshold: 0.3, // Lowered threshold to 0.3
       invokeCallbackOnNoiseAndUnknown: true,
       overlapFactor: 0.50 // Adjust overlap factor to improve responsiveness
     });
