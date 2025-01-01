@@ -150,16 +150,16 @@
       const scores = result.scores;
       const currentTime = Date.now();
 
-      if (currentTime - lastCommandTime < 2000 || directionLocked) {  // Increased cooldown time to 2000ms
+      if (currentTime - lastCommandTime < 1500 || directionLocked) {  // Shortened cooldown to 1500ms
         return;
       }
 
       let newDirection = null;
 
-      const threshold = 0.7;  // Raised threshold to 0.7 for better control
+      const threshold = 0.7;  // Slightly increased threshold for better control
 
-      // Only consider results where the background noise is low
-      const noiseThreshold = 0.5;
+      // More aggressive background noise filtering
+      const noiseThreshold = 0.2;  // Increased noise threshold
       if (result.scores[4] > noiseThreshold) {
         console.log("Ignoring due to background noise");
         return;
@@ -189,7 +189,7 @@
         directionLocked = true;
         lastCommandTime = currentTime;
 
-        setTimeout(() => { directionLocked = false; }, 1500);  // Longer lock time
+        setTimeout(() => { directionLocked = false; }, 1500);  // Still using cooldown but slightly shortened
       }
     }, {
       includeSpectrogram: true,
