@@ -1,4 +1,3 @@
-// Declare global variables
 let recognizer, gameSnake;
 
 // Snake Game Class
@@ -92,6 +91,7 @@ class SnakeGame {
         let nx = head.x;
         let ny = head.y;
 
+        // Update snake's head based on direction
         switch (this.direction) {
             case 'right': nx++; break;
             case 'left': nx--; break;
