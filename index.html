@@ -150,16 +150,16 @@
       const scores = result.scores;
       const currentTime = Date.now();
 
-      if (currentTime - lastCommandTime < 500 || directionLocked) {  // Reduced cooldown to 500ms for faster feedback
+      if (currentTime - lastCommandTime < 500 || directionLocked) {
         return;
       }
 
       let newDirection = null;
 
-      const threshold = 0.7;  // Increased threshold for more stable recognition
+      const threshold = 0.6;  // 提高閾值以增強識別精確度
 
-      // Aggressive background noise filtering
-      const noiseThreshold = 0.2;  // Decreased noise threshold
+      // 更強的背景噪音過濾
+      const noiseThreshold = 0.1;  // 減少背景噪音影響
       if (result.scores[4] > noiseThreshold) {
         console.log("Ignoring due to background noise");
         return;
@@ -189,11 +189,11 @@
         directionLocked = true;
         lastCommandTime = currentTime;
 
-        setTimeout(() => { directionLocked = false; }, 500);  // Reduced cooldown to 500ms for faster feedback
+        setTimeout(() => { directionLocked = false; }, 500);
       }
     }, {
       includeSpectrogram: true,
-      probabilityThreshold: 0.3,
+      probabilityThreshold: 0.5,  // 調整識別閾值
       invokeCallbackOnNoiseAndUnknown: true,
       overlapFactor: 0.50
     });
