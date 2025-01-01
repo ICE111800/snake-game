@@ -183,7 +183,7 @@ function toggleVoiceControl() {
 // 初始化語音控制
 async function initVoiceControl() {
   try {
-    const URL = './my_model/';
+    const URL = 'https://github.com/ICE111800/snake-game/raw/master/my_model/';
     recognizer = await speechCommands.create('BROWSER_FFT', undefined, URL + 'model.json', URL + 'metadata.json');
     await recognizer.ensureModelLoaded();
     console.log('Voice recognition model loaded.');
