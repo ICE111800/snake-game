@@ -1,116 +1,142 @@
-let gameSnake;
-let recognizer;
+let recognizer, gameSnake;
 
-// Voice Command Threshold
-const VOICE_COMMAND_THRESHOLD = 0.75;
-
-function initGame() {
-    const canvas = document.getElementById('stage');
-    const context = canvas.getContext('2d');
-    if (!canvas || !context) {
-        console.error("Canvas element not found. Ensure the <canvas> element is defined with id='stage'.");
-        return;
-    }
-    gameSnake = new SnakeGame(canvas, context, { fps: 100, size: 5 });
-}
-
+// Snake Game Class
 class SnakeGame {
     constructor(canvas, context, config) {
         this.canvas = canvas;
         this.context = context;
-        this.config = Object.assign({ fps: 100, size: 5 }, config);
+        this.config = Object.assign({ fps: 100, size: 5, cw: 10 }, config);
         this.snake = [];
         this.food = {};
         this.direction = 'right';
         this.score = 0;
-        this.running = false;
-
-        this.init();
-        setInterval(() => this.update(), 1000 / this.config.fps);
+        this.initGame();
     }
 
-    init() {
+    // Initialize game
+    initGame() {
         this.snake = [];
-        for (let i = this.config.size - 1; i >= 0; i--) {
+        for (let i = 0; i < this.config.size; i++) {
             this.snake.push({ x: i, y: 0 });
         }
         this.spawnFood();
-        this.running = true;
+        this.score = 0;
+        this.direction = 'right';
+        this.runGame();
     }
 
+    // Spawn food at a random location
     spawnFood() {
+        const cw = this.config.cw;
         this.food = {
-            x: Math.floor(Math.random() * (this.canvas.width / 10)),
-            y: Math.floor(Math.random() * (this.canvas.height / 10)),
+            x: Math.floor(Math.random() * (this.canvas.width / cw)),
+            y: Math.floor(Math.random() * (this.canvas.height / cw)),
         };
     }
 
-    update() {
-        if (!this.running) return;
+    // Change snake direction
+    changeDirection(newDirection) {
+        const oppositeDirections = {
+            up: 'down',
+            down: 'up',
+            left: 'right',
+            right: 'left',
+        };
 
-        const head = { ...this.snake[0] };
+        if (this.direction !== oppositeDirections[newDirection]) {
+            this.direction = newDirection;
+        }
+    }
+
+    // Check for collision
+    checkCollision(nx, ny) {
+        const hitWall =
+            nx < 0 ||
+            ny < 0 ||
+            nx >= this.canvas.width / this.config.cw ||
+            ny >= this.canvas.height / this.config.cw;
+
+        const hitSelf = this.snake.some(segment => segment.x === nx && segment.y === ny);
+
+        return hitWall || hitSelf;
+    }
+
+    // Draw the game
+    drawGame() {
+        const { context, config, snake, food } = this;
+        const cw = config.cw;
+
+        // Clear canvas
+        context.fillStyle = 'white';
+        context.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+        // Draw snake
+        context.fillStyle = 'green';
+        snake.forEach(segment => {
+            context.fillRect(segment.x * cw, segment.y * cw, cw, cw);
+        });
+
+        // Draw food
+        context.fillStyle = 'red';
+        context.fillRect(food.x * cw, food.y * cw, cw, cw);
+
+        // Draw score
+        context.fillStyle = 'black';
+        context.fillText(`Score: ${this.score}`, 5, this.canvas.height - 5);
+    }
+
+    // Update game state
+    updateGame() {
+        const head = this.snake[0];
+        let nx = head.x;
+        let ny = head.y;
+
         switch (this.direction) {
-            case 'right': head.x++; break;
-            case 'left': head.x--; break;
-            case 'up': head.y--; break;
-            case 'down': head.y++; break;
+            case 'right': nx++; break;
+            case 'left': nx--; break;
+            case 'up': ny--; break;
+            case 'down': ny++; break;
         }
 
-        if (this.isCollision(head)) {
+        if (this.checkCollision(nx, ny)) {
             console.log('Collision detected. Restarting...');
-            this.init();
+            this.initGame();
             return;
         }
 
-        if (head.x === this.food.x && head.y === this.food.y) {
+        const newHead = { x: nx, y: ny };
+
+        if (nx === this.food.x && ny === this.food.y) {
             this.score++;
             this.spawnFood();
         } else {
             this.snake.pop();
         }
 
-        this.snake.unshift(head);
-        this.draw();
+        this.snake.unshift(newHead);
     }
 
-    isCollision(head) {
-        if (head.x < 0 || head.y < 0 ||
-            head.x >= this.canvas.width / 10 || head.y >= this.canvas.height / 10) {
-            return true;
-        }
-        return this.snake.slice(1).some(segment => segment.x === head.x && segment.y === head.y);
-    }
-
-    draw() {
-        this.context.fillStyle = 'white';
-        this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
-        this.snake.forEach(segment => {
-            this.context.fillStyle = 'green';
-            this.context.fillRect(segment.x * 10, segment.y * 10, 10, 10);
-        });
-
-        this.context.fillStyle = 'red';
-        this.context.fillRect(this.food.x * 10, this.food.y * 10, 10, 10);
-
-        this.context.fillStyle = 'black';
-        this.context.fillText(`Score: ${this.score}`, 10, this.canvas.height - 10);
-    }
-
-    changeDirection(newDirection) {
-        const opposite = {
-            up: 'down',
-            down: 'up',
-            left: 'right',
-            right: 'left',
-        };
-        if (newDirection !== opposite[this.direction]) {
-            this.direction = newDirection;
-            console.log('Direction changed to:', newDirection);
-        }
+    // Run the game
+    runGame() {
+        setInterval(() => {
+            this.updateGame();
+            this.drawGame();
+        }, this.config.fps);
     }
 }
 
+// Initialize game on page load
+window.onload = function () {
+    const canvas = document.getElementById('stage');
+    const context = canvas.getContext('2d');
+    if (!canvas || !context) {
+        console.error("Canvas element or context not found.");
+        return;
+    }
+    gameSnake = new SnakeGame(canvas, context, { fps: 100, size: 5 });
+};
+
+// Initialize voice control
 async function initVoiceControl() {
     try {
         const modelURL = 'https://ice111800.github.io/snake-game/my_model/model.json';
@@ -126,15 +152,14 @@ async function initVoiceControl() {
             const highestScore = Math.max(...scores);
             const command = labels[scores.indexOf(highestScore)];
 
-            if (highestScore > VOICE_COMMAND_THRESHOLD) {
+            if (highestScore > 0.75) {
+                console.log(`Voice Command: ${command}, Score: ${highestScore}`);
                 if (['up', 'down', 'left', 'right'].includes(command)) {
                     gameSnake.changeDirection(command);
                 }
             }
-        }, { overlapFactor: 0.5, probabilityThreshold: VOICE_COMMAND_THRESHOLD });
+        }, { overlapFactor: 0.5, probabilityThreshold: 0.75 });
     } catch (err) {
         console.error('Error initializing voice control:', err);
     }
 }
-
-window.onload = initGame;
