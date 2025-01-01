@@ -147,59 +147,54 @@
     return recognizer;
   }
 
-  async function init() {
-    const recognizer = await createModel();
-    const classLabels = recognizer.wordLabels();
-    const labelContainer = document.getElementById("label-container");
+  // 語音識別設定
+async function init() {
+  const recognizer = await createModel();
+  const classLabels = recognizer.wordLabels();
+  const labelContainer = document.getElementById("label-container");
 
-    for (let i = 0; i < classLabels.length; i++) {
-      labelContainer.appendChild(document.createElement("div"));
-    }
-
-    recognizer.listen(result => {
-      const scores = result.scores;
-      for (let i = 0; i < classLabels.length; i++) {
-        const classPrediction = classLabels[i] + ": " + result.scores[i].toFixed(2);
-        labelContainer.childNodes[i].innerHTML = classPrediction;
-        console.log(classPrediction);  // Debug line to check recognition results
-
-        // Control snake based on speech commands
-        if (classLabels[i] === "up" && result.scores[i] > 0.75) {
-          if (snake.dy !== grid) {  // Prevent snake from moving in the opposite direction
-            snake.dy = -grid;
-            snake.dx = 0;
-            console.log("Moving up: ", snake.dy, snake.dx);  // Debug: Output snake direction
-          }
-        } else if (classLabels[i] === "down" && result.scores[i] > 0.75) {
-          if (snake.dy !== -grid) {  // Prevent snake from moving in the opposite direction
-            snake.dy = grid;
-            snake.dx = 0;
-            console.log("Moving down: ", snake.dy, snake.dx);  // Debug: Output snake direction
-          }
-        } else if (classLabels[i] === "left" && result.scores[i] > 0.75) {
-          if (snake.dx !== grid) {  // Prevent snake from moving in the opposite direction
-            snake.dx = -grid;
-            snake.dy = 0;
-            console.log("Moving left: ", snake.dy, snake.dx);  // Debug: Output snake direction
-          }
-        } else if (classLabels[i] === "right" && result.scores[i] > 0.75) {
-          if (snake.dx !== -grid) {  // Prevent snake from moving in the opposite direction
-            snake.dx = grid;
-            snake.dy = 0;
-            console.log("Moving right: ", snake.dy, snake.dx);  // Debug: Output snake direction
-          }
-        }
-      }
-    }, {
-      includeSpectrogram: true,
-      probabilityThreshold: 0.75,
-      invokeCallbackOnNoiseAndUnknown: true,
-      overlapFactor: 0.50
-    });
-
-    // Start the game loop after recognizer is ready
-    requestAnimationFrame(loop);
+  for (let i = 0; i < classLabels.length; i++) {
+    labelContainer.appendChild(document.createElement("div"));
   }
+
+  recognizer.listen(result => {
+    console.log("Speech result:", result); // 輸出語音識別結果
+    const scores = result.scores;
+    for (let i = 0; i < classLabels.length; i++) {
+      const classPrediction = classLabels[i] + ": " + result.scores[i].toFixed(2);
+      labelContainer.childNodes[i].innerHTML = classPrediction;
+      console.log(classPrediction);  // 輸出每個命令的信心水平
+
+      // 語音控制蛇的移動
+      if (classLabels[i] === "up" && result.scores[i] > 0.75) {
+        snake.dy = -grid;
+        snake.dx = 0;
+        console.log("Moving up: ", snake.dy, snake.dx);  // Debug: 輸出蛇的方向
+      } else if (classLabels[i] === "down" && result.scores[i] > 0.75) {
+        snake.dy = grid;
+        snake.dx = 0;
+        console.log("Moving down: ", snake.dy, snake.dx);  // Debug: 輸出蛇的方向
+      } else if (classLabels[i] === "left" && result.scores[i] > 0.75) {
+        snake.dx = -grid;
+        snake.dy = 0;
+        console.log("Moving left: ", snake.dy, snake.dx);  // Debug: 輸出蛇的方向
+      } else if (classLabels[i] === "right" && result.scores[i] > 0.75) {
+        snake.dx = grid;
+        snake.dy = 0;
+        console.log("Moving right: ", snake.dy, snake.dx);  // Debug: 輸出蛇的方向
+      }
+    }
+  }, {
+    includeSpectrogram: true,
+    probabilityThreshold: 0.5, // 降低識別閾值
+    invokeCallbackOnNoiseAndUnknown: true,
+    overlapFactor: 0.50
+  });
+
+  // 啟動遊戲循環
+  requestAnimationFrame(loop);
+}
+
 
   // Start initialization
   init();
