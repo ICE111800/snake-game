@@ -19,13 +19,16 @@
             font-size: 16px;
         }
     </style>
+    <!-- 引入 TensorFlow 和 Speech Commands 庫 -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.3.1/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/speech-commands@0.4.0/dist/speech-commands.min.js"></script>
 </head>
 <body>
     <h1>Snake Game with Voice Control</h1>
     <canvas id="stage" width="400" height="400"></canvas>
     <button onclick="initVoiceControl()">Start Voice Control</button>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.3.1/dist/tf.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/speech-commands@0.4.0/dist/speech-commands.min.js"></script>
+
+    <!-- 引入自訂的 JavaScript -->
     <script src="script.js"></script>
 </body>
 </html>
