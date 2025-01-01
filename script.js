@@ -1,6 +1,6 @@
-let recognizer, gameSnake;
+let recognizer, snakeGame;
 
-// Snake Game Class
+// Initialize the Snake Game
 class SnakeGame {
     constructor(canvas, context, config) {
         this.canvas = canvas;
@@ -34,7 +34,7 @@ class SnakeGame {
         };
     }
 
-    // Change snake direction
+    // Change snake direction based on speech command
     changeDirection(newDirection) {
         const oppositeDirections = {
             up: 'down',
@@ -48,7 +48,7 @@ class SnakeGame {
         }
     }
 
-    // Check for collision
+    // Check for collision with walls or self
     checkCollision(nx, ny) {
         const hitWall =
             nx < 0 ||
@@ -107,6 +107,7 @@ class SnakeGame {
 
         const newHead = { x: nx, y: ny };
 
+        // If snake eats food, increase score and spawn new food
         if (nx === this.food.x && ny === this.food.y) {
             this.score++;
             this.spawnFood();
@@ -125,17 +126,6 @@ class SnakeGame {
         }, this.config.fps);
     }
 }
-
-// Initialize game on page load
-window.onload = function () {
-    const canvas = document.getElementById('stage');
-    const context = canvas.getContext('2d');
-    if (!canvas || !context) {
-        console.error("Canvas element or context not found.");
-        return;
-    }
-    gameSnake = new SnakeGame(canvas, context, { fps: 100, size: 5 });
-};
 
 // Initialize voice control
 async function initVoiceControl() {
@@ -157,7 +147,7 @@ async function initVoiceControl() {
             if (highestScore > 0.75) {
                 console.log(`Voice Command: ${command}, Score: ${highestScore}`);
                 if (['up', 'down', 'left', 'right'].includes(command)) {
-                    gameSnake.changeDirection(command);
+                    snakeGame.changeDirection(command);
                 }
             }
         }, { overlapFactor: 0.5, probabilityThreshold: 0.75 });
@@ -165,3 +155,15 @@ async function initVoiceControl() {
         console.error('Error initializing voice control:', err);
     }
 }
+
+// Initialize game on page load
+window.onload = function () {
+    const canvas = document.getElementById('stage');
+    const context = canvas.getContext('2d');
+    if (!canvas || !context) {
+        console.error("Canvas element or context not found.");
+        return;
+    }
+    snakeGame = new SnakeGame(canvas, context, { fps: 100, size: 5 });
+    initVoiceControl();
+};

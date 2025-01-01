@@ -1,52 +1,7 @@
-/* 基本樣式 */
 body {
-  text-align: center;
-  font-family: 'Arial', sans-serif;
-  background-color: #f4f4f4; /* 輕微灰色背景 */
-  margin: 0;
-  padding: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
+  text-align:center;
+  font-family: helvetica;
 }
-
-h3 {
-  font-size: 24px;
-  color: #333;
-}
-
-/* Canvas畫布 */
 canvas {
-  border: 2px solid #999;
-  background-color: #000; /* 黑色背景更符合遊戲風格 */
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* 增加陰影使畫布更立體 */
-  margin-bottom: 20px;
-}
-
-/* 按鈕樣式 */
-button {
-  background-color: #4CAF50; /* 綠色背景 */
-  border: none;
-  color: white;
-  padding: 10px 20px;
-  font-size: 16px;
-  cursor: pointer;
-  border-radius: 5px;
-  transition: background-color 0.3s ease;
-}
-
-button:hover {
-  background-color: #45a049; /* 鼠標懸停效果 */
-}
-
-/* 結果顯示 */
-#label-container {
-  font-size: 16px;
-  color: #333;
-  margin-top: 20px;
-  display: flex;
-  justify-content: center;
-  flex-direction: column;
-  gap: 10px;
+  border: 2px solid rgb(151, 149, 149);
 }
