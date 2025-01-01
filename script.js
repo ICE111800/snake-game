@@ -2,43 +2,12 @@
  * Namespace
  */
 var Game = Game || {};
-var Keyboard = Keyboard || {};
 var Component = Component || {};
-
-/**
- * Keyboard Map
- */
-Keyboard.Keymap = {
-  37: 'left',
-  38: 'up',
-  39: 'right',
-  40: 'down'
-};
-
-/**
- * Keyboard Events
- */
-Keyboard.ControllerEvents = function () {
-  var self = this;
-  this.pressKey = null;
-  this.keymap = Keyboard.Keymap;
-
-  // Keydown Event
-  document.onkeydown = function (event) {
-    self.pressKey = event.which;
-  };
-
-  // Get Key
-  this.getKey = function () {
-    return this.keymap[this.pressKey];
-  };
-};
 
 /**
  * Game Component Stage
  */
 Component.Stage = function (canvas, conf) {
-  this.keyEvent = new Keyboard.ControllerEvents();
   this.width = canvas.width;
   this.height = canvas.height;
   this.length = [];
@@ -89,7 +58,6 @@ Component.Snake = function (canvas, conf) {
     this.stage.food = {};
     this.stage.score = 0;
     this.stage.direction = 'right';
-    this.stage.keyEvent.pressKey = null;
     this.initSnake();
     this.initFood();
   };
@@ -100,11 +68,6 @@ Component.Snake = function (canvas, conf) {
  */
 Game.Draw = function (context, snake) {
   this.drawStage = function () {
-    var keyPress = snake.stage.keyEvent.getKey();
-    if (typeof keyPress != 'undefined') {
-      snake.stage.direction = keyPress;
-    }
-
     context.fillStyle = 'white';
     context.fillRect(0, 0, snake.stage.width, snake.stage.height);
 
@@ -171,20 +134,11 @@ Game.Snake = function (elementId, conf) {
 // Teachable Machine Voice Control
 let recognizer, voiceControlEnabled = true;
 
-// Toggle Voice Control
-function toggleVoiceControl() {
-  voiceControlEnabled = !voiceControlEnabled;
-
-  if (voiceControlEnabled) {
-    initVoiceControl();  // 在啟用語音控制後初始化
-  }
-}
-
-// 初始化語音控制
+// Initialize voice control
 async function initVoiceControl() {
   try {
-    const modelURL = "https://ICE111800.github.io/snake-game/my_model/model.json";
-    const metadataURL = "https://ICE111800.github.io/snake-game/my_model/metadata.json";
+    const modelURL = "./my_model/model.json";
+    const metadataURL = "./my_model/metadata.json";
 
     recognizer = await speechCommands.create('BROWSER_FFT', undefined, modelURL, metadataURL);
     await recognizer.ensureModelLoaded();
@@ -196,10 +150,11 @@ async function initVoiceControl() {
       const highestScore = Math.max(...scores);
       const direction = labels[scores.indexOf(highestScore)];
 
-      console.log('Voice Command:', direction, 'Score:', highestScore); 
+      console.log('Voice Command:', direction, 'Score:', highestScore);
 
+      // Change direction based on voice command
       if (voiceControlEnabled && highestScore > 0.75) {
-        if (['上', '下', '左', '右'].includes(direction)) {
+        if (['up', 'down', 'left', 'right'].includes(direction)) {
           snake.snake.stage.direction = direction;
           console.log('Direction Changed to:', direction);
         }
@@ -210,19 +165,7 @@ async function initVoiceControl() {
   }
 }
 
-
-
 window.onload = function () {
   window.snake = new Game.Snake('stage', { fps: 100, size: 4 });
-};
-
-
-
-function toggleVoiceControl() {
-  voiceControlEnabled = !voiceControlEnabled;
-}
-
-window.onload = function () {
-  window.snake = new Game.Snake('stage', { fps: 100, size: 4 });
-  initVoiceControl();
+  initVoiceControl();  // Initialize voice control on page load
 };

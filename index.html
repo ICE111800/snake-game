@@ -9,10 +9,12 @@
 <body>
   <h3>Simple Snake Game with Voice Control</h3>
   <canvas id="stage" height="400" width="520"></canvas>
+  
+  <!-- 顯示語音命令的預測結果 -->
   <div id="label-container"></div>
 
-  <!-- 這個按鈕用於啟用/禁用語音控制 -->
-  <button type="button" onclick="toggleVoiceControl()">Toggle Voice Control</button>
+  <!-- 這個按鈕用於啟用語音控制 -->
+  <button type="button" onclick="init()">Start Voice Control</button>
 
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.3.1/dist/tf.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/speech-commands@0.4.0/dist/speech-commands.min.js"></script>
