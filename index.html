@@ -150,13 +150,13 @@
       const scores = result.scores;
       const currentTime = Date.now();
 
-      if (currentTime - lastCommandTime < 1000 || directionLocked) {  // Reduced cooldown to 1000ms
+      if (currentTime - lastCommandTime < 1000 || directionLocked) {  // Increased cooldown to 1000ms
         return;
       }
 
       let newDirection = null;
 
-      const threshold = 0.6;  // Reduced threshold to 0.6 for quicker response
+      const threshold = 0.7;  // Increased threshold to 0.7 for more stable recognition
 
       // More aggressive background noise filtering
       const noiseThreshold = 0.4;  // Increased noise threshold
@@ -189,7 +189,7 @@
         directionLocked = true;
         lastCommandTime = currentTime;
 
-        setTimeout(() => { directionLocked = false; }, 1000);  // Reduced cooldown to 1000ms
+        setTimeout(() => { directionLocked = false; }, 1000);  // Increased cooldown to 1000ms
       }
     }, {
       includeSpectrogram: true,
